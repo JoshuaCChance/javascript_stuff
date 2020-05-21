@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+	<title>Basics</title>
+	<meta charset="utf-8">
+
+<script language="javascript">
+	//set some basic global params to start off with
+	//var boundryWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+	//var boundryHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+	
+	var boundryWidth = 790;
+	var boundryHeight = 790;
+
+	//our time tracker
+	var curTime = 0;
+	//our object array
+	var objs = [];
+	//amount to drop in a single draw
+	var gravAmnt = 5;
+
+	function canvasSetUp(){
+		setCanvasListeners();
+		beginTimer();
+		var canvas = document.getElementById("myCanvas");
+		console.log("Size: X -> " + canvas.width + ", Y -> " + canvas.height);
+	}
+
+	function setCanvasListeners(){
+		var clickListener = document.addEventListener("click",getClickPos);
+		//var mouseDownInCanvasListener = document.addEventListener("mousedown",whichButton);
+	}
+
+	function getClickPos(event){
+		var x = event.x -15;
+		var y = event.y -15;
+		var pressed = event.button;
+		//make sure the key press happened within our boundaries
+		if(x > 10 && x < boundryWidth && y > 10 && y < boundryHeight){
+			//assume we didn't have one there....
+			var thisObject = {xPos:x,yPos:y,color:selectColor(),width:10,height:10,name:selectName()};
+			objs[objs.length] = thisObject;
+			console.log("Item added at X -> " + x + ", Y -> " + y);
+		}
+		
+	}
+
+	function selectName(){
+		var randP1 = Math.floor(Math.random() * 10); //returns a random between 0 and 9
+		var randP2 = Math.floor(Math.random() * 10); //returns a random between 0 and 9
+		var randP3 = Math.floor(Math.random() * 10); //returns a random between 0 and 9
+		var randP4 = Math.floor(Math.random() * 10); //returns a random between 0 and 9
+		var useName = randP1 + "-" + randP2 + "-" + randP3 + "-" + randP4;
+		return useName;
+	}
+
+	function selectColor(){
+		var randCol = Math.floor(Math.random() * 4); //returns a random between 0 and 3
+		var useCol = '#FF0000'; //default red
+		if(randCol == 0){ 
+			var randR1 = 'F';
+			var randR2 = 'F';
+			var randG1 = Math.floor(Math.random() * 10);
+			var randG2 = Math.floor(Math.random() * 10);
+			var randB1 = Math.floor(Math.random() * 10);
+			var randB2 = Math.floor(Math.random() * 10);
+
+			var addRed = 1; //either 0 or 1
+			var addGreen = Math.floor(Math.random() * 1);
+			var addBlue = Math.floor(Math.random() * 1); 
+
+			if(addRed == 1){ var rr = randR1 + "" + randR2; }else{ var rr = "00"; }
+			if(addGreen == 1){ var gg = randG1 + "" + randG2; }else{ var gg = "00"; }
+			if(addBlue == 1){ var bb = randB1 + "" + randB2; }else{ var bb = "00"; }
+			useCol = "#" + rr + "" + gg + "" + bb;  
+		}//reds
+		if(randCol == 1){ 
+			var randR1 = Math.floor(Math.random() * 10);
+			var randR2 = Math.floor(Math.random() * 10);
+			var randG1 = 'F';
+			var randG2 = 'F';
+			var randB1 = Math.floor(Math.random() * 10);
+			var randB2 = Math.floor(Math.random() * 10);
+
+			var addRed = Math.floor(Math.random() * 1); //either 0 or 1
+			var addGreen = 1;
+			var addBlue = Math.floor(Math.random() * 1); 
+
+			if(addRed == 1){ var rr = randR1 + "" + randR2; }else{ var rr = "00"; }
+			if(addGreen == 1){ var gg = randG1 + "" + randG2; }else{ var gg = "00"; }
+			if(addBlue == 1){ var bb = randB1 + "" + randB2; }else{ var bb = "00"; }
+			useCol = "#" + rr + "" + gg + "" + bb; 
+		}//blues
+		if(randCol == 2){ 
+			var randR1 = Math.floor(Math.random() * 10);
+			var randR2 = Math.floor(Math.random() * 10);
+			var randG1 = Math.floor(Math.random() * 10);
+			var randG2 = Math.floor(Math.random() * 10);
+			var randB1 = 'F';
+			var randB2 = 'F';
+			var addRed = Math.floor(Math.random() * 1); //either 0 or 1
+			var addGreen = Math.floor(Math.random() * 1);
+			var addBlue = 1; 
+
+			if(addRed == 1){ var rr = randR1 + "" + randR2; }else{ var rr = "00"; }
+			if(addGreen == 1){ var gg = randG1 + "" + randG2; }else{ var gg = "00"; }
+			if(addBlue == 1){ var bb = randB1 + "" + randB2; }else{ var bb = "00"; }
+			useCol = "#" + rr + "" + gg + "" + bb; 
+		}//greens
+		if(randCol == 3){ 
+			var randR1 = 'C';
+			var randR2 = 'C';
+			var randG1 = 'C';
+			var randG2 = 'C';
+			var randB1 = 'C';
+			var randB2 = 'C';
+			var addRed = 1; //either 0 or 1
+			var addGreen = 1;
+			var addBlue = 1; 
+
+			if(addRed == 1){ var rr = randR1 + "" + randR2; }else{ var rr = "00"; }
+			if(addGreen == 1){ var gg = randG1 + "" + randG2; }else{ var gg = "00"; }
+			if(addBlue == 1){ var bb = randB1 + "" + randB2; }else{ var bb = "00"; }
+			useCol = "#" + rr + "" + gg + "" + bb;
+		}//grays
+
+		return useCol;
+	}
+
+	function beginTimer(){
+		var stdTimer = setInterval(draw,50);
+	}
+
+	function draw(){
+		//grab the canvas details
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		//first, clear what's there
+		wipeCanvasClean();
+		//now add to the time
+		curTime += 1;
+		//detail what we're about to draw out
+		//ctx.font = "16px Arial";
+		//ctx.fillStyle = "red";
+		//ctx.textAlign = "center";
+		//add the text
+		//ctx.fillText("T: " + curTime + " ",canvas.width/2,canvas.height/2);
+		var tempObjs = [];
+		for(i=objs.length;i>0;i--){
+			var curObject = objs[i -1];
+
+			var thisX = curObject.xPos;
+			var thisY = curObject.yPos;
+
+			//do gravity
+			thisY = gravity(thisY);
+
+			//commit the new object settings to another array
+			var thisObject = {xPos:thisX,yPos:thisY,color:curObject.color,width:curObject.width,height:curObject.height,name:curObject.name};
+			tempObjs[tempObjs.length] = thisObject;
+			
+
+			//get the string lenght
+			var thatX = thisX +5;
+			var thatY = thisY -1;
+
+			ctx.fillStyle = curObject.color;
+			ctx.fillRect(thisX,thisY,curObject.width,curObject.height);
+
+			ctx.font = "8pt Arial";
+			ctx.fillStyle = curObject.color;
+			ctx.textAlign = "center";
+			//add the text
+			ctx.fillText(curObject.name,thatX,thatY);
+			//var setSpot = curObject.xPos + ":" + curObject.yPos;
+			//ctx.fillText(setSpot,thatX,thatY);
+		}
+		objs = tempObjs;
+		tempObjs = [];
+	}
+	function wipeCanvasClean(){
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+	}
+	function whichElement(e) {
+    	var targ;
+    	if (!e) {
+    	    var e = window.event;
+    	}
+    	if (e.target) {
+    	    targ=e.target;
+    	} else if (e.srcElement) {
+    	    targ=e.srcElement;
+    	}
+    	var tname;
+    	tname = targ.tagName;
+    	alert("You clicked on a " + tname + " element.");
+	}
+	function whichButton(event) {
+    	alert("You pressed button: " + event.button)
+	}
+	function clearCanvas(){
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		//now clear out the list
+		objs = [];
+	}
+	function gravity(curYPos){
+		if(curYPos < 790){
+			curYPos = curYPos + gravAmnt;
+		}else{
+			curYPos = 790;
+		}
+		return curYPos;
+	}
+
+</script>
+<style>
+	#myCanvas{
+		border:1px solid #000000;
+		background-color: black;
+	}
+
+</style>
+
+</head>
+<body onLoad='canvasSetUp();'>
+
+	<canvas id="myCanvas" width='800' height='800'></canvas>
+	<br/>
+	<input type="button" name="clearButton" value="Clear" onClick="clearCanvas();" />
+
+</body>
+
+</html>
