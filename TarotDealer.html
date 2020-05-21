@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<meta charset="utf-8">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script language="javascript">
+			//our global vars
+			var tarotDeck = [];
+			var thisTimer;
+			
+			function init(){
+				var resetButton = document.getElementById('resetButton');
+				resetButton.disabled = true;
+
+				$("#B").hide();
+				$("#C").hide();
+		
+				for(i=0;i<10;i++){
+					var num = i  +1;
+					var thisLoc = document.getElementById(i);
+					var thisId = "#" + i;
+					thisLoc.innerHTML = '';
+					$(thisId).hide();
+				}
+			}
+
+			function createDeck(){
+				//blank the deck
+				tarotDeck = [];
+				var minorArcanaSuits = ['Wands','Coins','Cups','Swords'];
+				var minorArcanaValues = ['Ace','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Page','Knight','Queen','King'];
+				var majorArcana = ['The Fool','The Magician','The High Priestess','The Empress','The Emporer','The Heirophant','The Lovers','The Chariot','Strength','The Hermit','Wheel of Fortune','Justice','The Hanged Man','Death','Temperance','The Devil','The Tower','The Star','The Moon','The Sun','Judgement','The World'];
+				//push the major
+				for(m=0;m<majorArcana.length;m++){
+					//grab this one
+					var thisMajorArcanaCard = majorArcana[m];
+					//add it to the deck
+					tarotDeck.push(thisMajorArcanaCard);
+				}
+				//now create and push the minor
+				for(s=0;s<minorArcanaSuits.length;s++){
+					var thisSuit = minorArcanaSuits[s];
+					for(v=0;v<minorArcanaValues.length;v++){
+						var thisVal = minorArcanaValues[v];
+						var thisCardName = thisVal + " of " + thisSuit;
+						//now add it to the deck
+						tarotDeck.push(thisCardName);
+					}
+				}
+				//console.log(tarotDeck);
+			}
+
+			function shuffle(){
+				//alert(tarotDeck.length);
+				var tempDeck = [];
+				var totCard = tarotDeck.length;
+				while(totCard > 0){
+					//get a random card from tarotDeck
+					var thisCardNum = Math.floor(Math.random() * totCard);
+					//get the entry at this location
+					var thisCard = tarotDeck[thisCardNum];
+					//console.log(thisCard + "(" + thisCardNum + ")");
+					//push it to the temp deck
+					tempDeck.push(thisCard);
+					//pop it from the orig
+					tarotDeck.splice(thisCardNum,1);
+					//console.log(tarotDeck);
+					totCard --;
+				}
+				tarotDeck = [];
+				tarotDeck = tempDeck;
+				tempDeck = [];
+				//console.log(tarotDeck);	
+			}
+
+			function deal(){
+				$("#B").show();
+				$("#C").show();
+				//grab and display the top 10
+				for(i=0;i<10;i++){
+					var num = i  +1;
+					var thisLoc = document.getElementById(i);
+					thisLoc.innerHTML = tarotDeck[i];
+					console.log(num + ": " + tarotDeck[i]);
+				}
+				beginTimer();
+			}
+
+			function swapButtons(id){
+				var dealButton = document.getElementById('dealButton');
+				var resetButton = document.getElementById('resetButton');
+				if(id === 'dealButton'){
+					dealButton.disabled = true;
+					resetButton.disabled = false;
+				}else{
+					dealButton.disabled = false;
+					resetButton.disabled = true;
+				}
+			}
+
+			function clear(){
+				//clear out our arrays
+				tarotDeck = [];
+				currentDeal = [];
+				$("#B").hide();
+				$("#C").hide();
+				
+				for(i=0;i<10;i++){
+					var num = i  +1;
+					var thisLoc = document.getElementById(i);
+					var thisId = "#" + i;
+					thisLoc.innerHTML = '';
+					$(thisId).hide();
+				}
+			}
+
+			function beginTimer(){
+				thisTimer = setTimeout(doTime(0),1000);
+			}
+
+			function doTime(x){
+				if(x <= 9){
+					var thisId = "#" + x;
+					$(thisId).show("slow");
+					x++;
+					thisTimer = setTimeout(doTime(x),1000);
+				}else{
+					x = 0;
+					clearTimeout(thisTimer);
+				}
+			}
+
+			$(document).ready(function(){
+
+				init();
+				
+				$("#dealButton").click(function(){
+					swapButtons('dealButton');
+					createDeck();
+					shuffle();
+					deal();
+				});
+
+				$("#resetButton").click(function(){
+					swapButtons('resetButton');
+					clear();
+				});
+
+			});
+
+		</script>
+
+		<style>
+			.cardHolders{
+				float: left;
+				clear: none;
+				border-top: 2px solid black;
+				border-left: 2px solid black;
+				border-right: 2px solid black;
+				min-width: 450px;
+			}
+			.buttonHolder{
+				float: left;
+				clear: both;
+				border: 2px solid black;
+				min-width: 450px;
+				text-align: center;
+			}
+			.cardColumn{
+				width: 25%;
+				float: left;
+				clear: none;
+			}
+			.cardRow{
+				width: 100%;
+				float: left;
+				clear: both;
+				min-height: 75px;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body onload="">
+		
+		<div id="" class="cardHolders">
+			<!-- column 1 -->
+			<div id="column1" class="cardColumn">
+				<div id="B" class="cardRow">&nbsp;</div>
+				<!-- #5 – This is your headlight. Where are you going? What path are you tracing? If the card says there is a negative energy on your way, what can you do to avoid it? How will you redirect your life to a better track? -->
+				<div id="5" class="cardRow" title="This is your headlight. Where are you going? What path are you tracing? If the card says there is a negative energy on your way, what can you do to avoid it? How will you redirect your life to a better track?">6</div>
+				<div id="B" class="cardRow">&nbsp;</div>
+				<div id="B" class="cardRow">&nbsp;</div>
+			</div>
+			<!-- column 2 -->
+			<div id="column2" class="cardColumn">
+				<!-- #4 – This deals with your conscious desires. What are your objectives and goals that are of extreme value to you right now? This is where you should place your strongest energy. Depending on the card, it may also signify how you should use that energy. -->
+				<div id="4" class="cardRow" title="This deals with your conscious desires. What are your objectives and goals that are of extreme value to you right now? This is where you should place your strongest energy. Depending on the card, it may also signify how you should use that energy.">5</div>
+				<!-- #0 – It presents your current situation. -->
+				<div id="0" class="cardRow" title="This represents your current situation.">1</div>
+				<!-- #1 – This across card will either tell you what is helping you or what is holding you back. -->
+				<div id="1" class="cardRow" title="This card will either tell you what is helping you or what is holding you back.">2</div>
+				<!-- #3 – This is your past card. What past events or issues are bugging your life until now? Bad past may have an adverse effect in your current situation that you probably need to let go real soon, and good past must be acknowledged as your life inspiration. -->
+				<div id="3" class="cardRow" title="This is your past card. What past events or issues are bugging your life until now? Bad past may have an adverse effect in your current situation that you probably need to let go real soon, and good past must be acknowledged as your life inspiration.">4</div>
+			</div>
+			<!-- column 3 -->
+			<div id="column3" class="cardColumn">
+				<div id="C" class="cardRow">&nbsp;</div>
+				<!-- #2 – It tackles your subconscious influences. What does your heart truly desire that you are unaware of? These influences you do not know have powerful effect in your everyday life. -->
+				<div id="2" class="cardRow" title="It tackles your subconscious influences. What does your heart truly desire that you are unaware of? These influences you do not know have powerful effect in your everyday life.">3</div>
+				<div id="C" class="cardRow">&nbsp;</div>
+				<div id="C" class="cardRow">&nbsp;</div>
+			</div>
+			<!-- column 4 -->
+			<div id="column4" class="cardColumn">
+				<!-- #9 – Final card and it means your final outcome. Based on your current energies, this will have a strong connection with your #5 card. What does it say? Are the energies complementing or conflicting each other?  -->
+				<div id="9" class="cardRow" title="Final card and it means your final outcome. Based on your current energies, this will have a strong connection with your #5 card. What does it say? Are the energies complementing or conflicting each other?">10</div>
+				<!-- #8 – This is a revelation card. It signifies the things that you should know and be aware of in your current situation. Something you should never neglect. -->
+				<div id="8" class="cardRow" title="This is a revelation card. It signifies the things that you should know and be aware of in your current situation. Something you should never neglect.">9</div>
+				<!-- #7 – This is an energy card. What kind of energy do you get from the people surrounding you and your environment? Are they helpful? -->
+				<div id="7" class="cardRow" title="This is an energy card. What kind of energy do you get from the people surrounding you and your environment? Are they helpful?">8</div>
+				<!-- #6 – This card is your attitude. It represents your actions, thoughts, and ideals -->
+				<div id="6" class="cardRow" title="This card is your attitude. It represents your actions, thoughts, and ideals.">7</div>
+			</div>
+		</div>
+		<div class="buttonHolder">
+			<input type="button" id="dealButton" value="Deal">&nbsp;
+			<input type="button" id="resetButton" value="Reset">
+		</div>
+	</body>
+</html>
