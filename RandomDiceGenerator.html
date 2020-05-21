@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<meta charset="utf-8">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+		<link href="https://fonts.googleapis.com/css?family=Amaranth" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Cuprum" rel="stylesheet">
+		<script language="javascript">
+			//our global vars
+			var maxDie;
+			var minDie;
+			function init(){
+				maxDie = 10;
+				minDie = 1;
+			}
+			function addTo(loc,curAmt, amt){
+				//create the ID
+				var thisId = loc + "Amt";
+				//add one to the amount given to us
+				var newAmt = parseInt(curAmt) + parseInt(amt);
+				//check it's a viable amount..
+				if((amt > 0 && newAmt <= maxDie) || (amt < 0 && newAmt >= minDie)){
+					//grab the location to edit
+					var thisLoc = document.getElementById(thisId);
+					//edit the location
+					thisLoc.innerHTML = newAmt;
+				}
+			}
+			function roll(max,count,loc){
+				//create the IDs
+				var thisResultId = loc + "Result";
+				var thisTotalId = loc + "Total";
+				//make an array to store the results in
+				var diceRolled = [];
+				//roll a die for each one in count
+				for(j=0;j<count;j++){
+					//make sure we're not exceeding the upper limit for this type of die
+					//grab a random value. add one so it's a value value (0-3 becomes 1-4)
+					var thisDieValue = Math.floor(Math.random() * max) +1;
+					//add the value to the array
+					diceRolled[j] = thisDieValue;
+				}
+				//alert(diceRolled);
+				//determine the total amount for these rolls
+				var totalAmt = 0;
+				for(k=diceRolled.length;k>0;k--){
+					var thisAmtToAdd = diceRolled[k -1];
+					totalAmt += thisAmtToAdd;
+				}
+				//alert(totalAmt);
+				//display the results
+				var resultLoc = document.getElementById(thisResultId);
+				resultLoc.innerHTML = diceRolled;
+				//populate the totals section
+				var totalLoc = document.getElementById(thisTotalId);
+				totalLoc.innerHTML = "Total: " + totalAmt;
+			}
+			$(document).ready(function(){
+				//doc is loaded, init vars
+				init();
+				//create our other functions
+				/* ---------- FOURS ------------ */
+				$("#fourInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("fourAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("four",curAmt,1);
+				});
+				$("#fourDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("fourAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("four",curAmt,-1);
+				});
+				$("#fourRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("fourAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 4;
+					//roll the dice
+					roll(rollMax,curAmt,"four");
+				});
+				/* ---------- SIXS ------------ */
+				$("#sixInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("sixAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("six",curAmt,1);
+				});
+				$("#sixDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("sixAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("six",curAmt,-1);
+				});
+				$("#sixRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("sixAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 6;
+					//roll the dice
+					roll(rollMax,curAmt,"six");
+				});
+				/* ---------- EIGHTS ------------ */
+				$("#eightInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("eightAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("eight",curAmt,1);
+				});
+				$("#eightDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("eightAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("eight",curAmt,-1);
+				});
+				$("#eightRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("eightAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 8;
+					//roll the dice
+					roll(rollMax,curAmt,"eight");
+				});
+				/* ---------- TENS ------------ */
+				$("#tenInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("tenAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("ten",curAmt,1);
+				});
+				$("#tenDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("tenAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("ten",curAmt,-1);
+				});
+				$("#tenRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("tenAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 10;
+					//roll the dice
+					roll(rollMax,curAmt,"ten");
+				});
+				/* ---------- TWELVES ------------ */
+				$("#twelveInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("twelveAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("twelve",curAmt,1);
+				});
+				$("#twelveDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("twelveAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("twelve",curAmt,-1);
+				});
+				$("#twelveRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("twelveAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 12;
+					//roll the dice
+					roll(rollMax,curAmt,"twelve");
+				});
+				/* ---------- TWENTIESS ------------ */
+				$("#twentyInc").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("twentyAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("twenty",curAmt,1);
+				});
+				$("#twentyDec").click(function(){
+					//get the current amt
+					var curAmt = document.getElementById("twentyAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }
+					//alert(curAmt);
+					addTo("twenty",curAmt,-1);
+				});
+				$("#twentyRoll").click(function(){
+					//grab hte numver of die to roll
+					var curAmt = document.getElementById("twentyAmt").innerHTML;
+					//make sure it's a number (just in case)
+					if(isNaN(curAmt)){ curAmt = 0; }else{ curAmt = parseInt(curAmt); }
+					//alert(curAmt);
+					//set the max value for each die
+					var rollMax = 20;
+					//roll the dice
+					roll(rollMax,curAmt,"twenty");
+				});
+			});
+		</script>
+		<style>
+			body{
+				font-family: 'Cuprum', sans-serif;
+			}
+			h3{
+				font-family: 'Amaranth', sans-serif;
+				padding: 0;
+				margin: 0;
+			}
+			#fourSided, #sixSided, #eightSided, #tenSided, #twelveSided, #twentySided{
+				float: left;
+				clear: none;
+				border: 1px solid black;
+				width: 240px;
+				margin-left: 10px;
+			}
+			#fourHeader, #sixHeader, #eightHeader, #tenHeader, #twelveHeader, #twentyHeader{
+				float: left;
+				clear: all;
+				width: 100%;
+				text-align: center;
+			}
+			#fourResult, #sixResult, #eightResult, #tenResult, #twelveResult, #twentyResult{
+				float: left;
+				clear: all;
+				width: 100%;
+				text-align: center;
+			}
+			#fourTotal, #sixTotal, #eightTotal, #tenTotal, #twelveTotal, #twentyTotal{
+				float: left;
+				clear: all;
+				width: 100%;
+				text-align: center;
+			}
+			#fourAmtHolder, #sixAmtHolder, #eightAmtHolder, #tenAmtHolder, #twelveAmtHolder, #twentyAmtHolder{
+				float: left;
+				clear: all;
+				width: 100%;
+			}
+			#fourBtnHolder, #sixBtnHolder, #eightBtnHolder, #tenBtnHolder, #twelveBtnHolder, #twentyBtnHolder{
+				float: left;
+				clear: none;
+				width: 100%;
+				text-align:	center;
+			}
+			#fourInc, #sixInc, #eightInc, #tenInc, #twelveInc, #twentyInc{
+				float: left;
+				clear: none;
+				font-style: bold;
+			}
+			#fourDie, #sixDie, #eightDie, #tenDie, #twelveDie, #twentyDie{
+				float: left;
+				clear: none;
+				text-align: right;
+				width: 50%;
+			}
+			#fourAmt, #sixAmt, #eightAmt, #tenAmt, #twelveAmt, #twentyAmt{
+				float: left;
+				clear: none;
+				text-align: left;
+				padding-left: 15px;
+				width: 50%;
+			}
+			#fourDec, #sixDec, #eightDec, #tenDec, #twelveDec, #twentyDec{
+				float: right;
+				clear: none;
+				font-style: bold;
+			}
+		</style>
+	</head>
+	<body onload="">
+		<div class="w3-container">
+			<!-- four sided die section -->
+			<div id="fourSided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="fourHeader" class="w3-container w3-blue w3-round w3-border w3-border-orange"><h3>Four Sided Die</h3></div>
+				<div id="fourResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="fourTotal">Total: 0</div>
+				<div id="fourDie">Die to Roll:</div>
+				<div id="fourAmt">1</div>
+				<div id="fourAmtHolder">
+					<input type="button" id="fourInc" value="+" class="w3-btn w3-medium w3-ripple w3-blue w3-round w3-border w3-border-orange">
+					<input type="button" id="fourDec" value="-" class="w3-btn w3-medium w3-ripple w3-blue w3-round w3-border w3-border-orange">
+				</div>
+				<div id="fourBtnHolder">
+					<input type="button" id="fourRoll" value="Roll" class="w3-btn w3-blue w3-border w3-border-orange w3-round">
+				</div>
+			</div>
+			<!-- six sided die section -->
+			<div id="sixSided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="sixHeader" class="w3-container w3-khaki w3-round w3-border w3-border-orange"><h3>Six Sided Die</h3></div>
+				<div id="sixResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="sixTotal">Total: 0</div>
+				<div id="sixDie">Die to Roll:</div>
+				<div id="sixAmt">1</div>
+				<div id="sixAmtHolder">
+					<input type="button" id="sixInc" value="+" class="w3-btn w3-medium w3-ripple w3-khaki w3-round w3-border w3-border-orange">
+					<input type="button" id="sixDec" value="-" class="w3-btn w3-medium w3-ripple w3-khaki w3-round w3-border w3-border-orange">
+				</div>
+				<div id="sixBtnHolder">
+					<input type="button" id="sixRoll" value="Roll" class="w3-btn w3-khaki w3-round w3-border w3-border-orange">
+				</div>
+			</div>
+			<!-- eight sided die section -->
+			<div id="eightSided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="eightHeader" class="w3-container w3-red w3-round w3-border w3-border-orange"><h3>Eight Sided Die</h3></div>
+				<div id="eightResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="eightTotal">Total: 0</div>
+				<div id="eightDie">Die to Roll:</div>
+				<div id="eightAmt">1</div>
+				<div id="eightAmtHolder">
+					<input type="button" id="eightInc" value="+" class="w3-btn w3-medium w3-ripple w3-red w3-round w3-border w3-border-orange">
+					<input type="button" id="eightDec" value="-" class="w3-btn w3-medium w3-ripple w3-red w3-round w3-border w3-border-orange">
+				</div>
+				<div id="eightBtnHolder">
+					<input type="button" id="eightRoll" value="Roll" class="w3-btn w3-red w3-border w3-border-orange w3-round">
+				</div>
+			</div>
+		</div>
+		<div class="w3-container" class="w3-container w3-sand w3-round w3-padding-small">
+			<!-- ten sided die section -->
+			<div id="tenSided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="tenHeader" class="w3-container w3-cyan w3-round w3-border w3-border-orange"><h3>Ten Sided Die</h3></div>
+				<div id="tenResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="tenTotal">Total: 0</div>
+				<div id="tenDie">Die to Roll:</div>
+				<div id="tenAmt">1</div>
+				<div id="tenAmtHolder">
+					<input type="button" id="tenInc" value="+" class="w3-btn w3-medium w3-ripple w3-cyan w3-border w3-border-orang w3-round">
+					<input type="button" id="tenDec" value="-" class="w3-btn w3-medium w3-ripple w3-cyan w3-border w3-border-orange w3-round">
+				</div>
+				<div id="tenBtnHolder">
+					<input type="button" id="tenRoll" value="Roll" class="w3-btn w3-cyan w3-border w3-border-orange w3-round">
+				</div>
+			</div>
+			<!-- twelve sided die section -->
+			<div id="twelveSided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="twelveHeader" class="w3-container w3-green w3-round w3-border w3-border-orange"><h3>Twelve Sided Die</h3></div>
+				<div id="twelveResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="twelveTotal">Total: 0</div>
+				<div id="twelveDie">Die to Roll:</div>
+				<div id="twelveAmt">1</div>
+				<div id="twelveAmtHolder">
+					<input type="button" id="twelveInc" value="+" class="w3-btn w3-medium w3-ripple w3-green w3-border w3-border-orange w3-round">
+					<input type="button" id="twelveDec" value="-" class="w3-btn w3-medium w3-ripple w3-green w3-border w3-border-orange w3-round">
+				</div>
+				<div id="twelveBtnHolder">
+					<input type="button" id="twelveRoll" value="Roll" class="w3-btn w3-green w3-border w3-border-orange w3-round">
+				</div>
+			</div>
+			<!-- twenty sided die section -->
+			<div id="twentySided" class="w3-container w3-sand w3-round w3-padding-small w3-margin-top">
+				<div id="twentyHeader" class="w3-container w3-deep-orange w3-round w3-border w3-border-orange"><h3>Twenty Sided Die</h3></div>
+				<div id="twentyResult" class="w3-container w3-light-gray w3-round w3-border w3-border-black">&nbsp;</div>
+				<div id="twentyTotal">Total: 0</div>
+				<div id="twentyDie">Die to Roll:</div>
+				<div id="twentyAmt">1</div>
+				<div id="twentyAmtHolder">
+					<input type="button" id="twentyInc" value="+" class="w3-btn w3-medium w3-ripple w3-deep-orange w3-border w3-border-orange w3-round">
+					<input type="button" id="twentyDec" value="-" class="w3-btn w3-medium w3-ripple w3-deep-orange w3-border w3-border-orange w3-round">
+				</div>
+				<div id="twentyBtnHolder">
+					<input type="button" id="twentyRoll" value="Roll" class="w3-btn w3-deep-orange w3-border w3-border-orange w3-round">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
