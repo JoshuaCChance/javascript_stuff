@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Black Jack</title>
+		<meta charset="utf-8">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+		<link href="https://fonts.googleapis.com/css?family=Amaranth" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Cuprum" rel="stylesheet">
+		<script language="javascript">
+			/* VARIABLES */
+			//set up the deck and card variables
+			var Deck = [];
+			var cardColors = ["red","black","red","black"];
+			var cardSuits = ["Hearts","Clubs","Diamonds","Spades"];
+			var cardSuitSymbols = ['\u2665','\u2663','\u2666','\u2660'];
+			var cardValues = [1,2,3,4,5,6,7,8,9,10,10,10,10];
+			var cardValText = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"];
+			//Betting pool variables
+			var currentBettingPool;
+			var currentBetAmount;
+			var minBet = 5;
+			var maxBet = 50;
+			//the players hands
+			var playersCurrentHand = [];
+			var dealersCurrentHand = [];
+			//some text variables
+			var betText = "Place your bet!";
+			var yourTurnText = "What would you like to do?";
+			var dealersTurnText = "Dealers turn....";
+			//some game condition variables
+			var playerHolds = false;
+			var dealerHolds = false;
+			var winCondMet = false;
+			/* FUNCTIONS */
+			function Init(){
+				/* initializes the game */
+				//first, reset the deck
+				ResetDeck();
+				//set up the betting pool
+				StartBettingPool();
+				SetMinsAndMaxes(minBet,maxBet);
+				//set the card option buttons to disabled...
+				DisableButton("dealButton");
+				DisableButton("hitMeButton");
+				DisableButton("holdButton");
+				DisableButton("doubleDownButton");
+				//set the header text
+				SetHeaderText(betText);
+				//set the totals text
+				SetPlayersTotalValueText(0,"white");
+				SetDealersTotalValueText("Unknown","white");
+			}
+
+			function DisableButton(buttonID){
+				/* disables the button with the provided ID */
+				//grab the button locations
+				var buttonLoc = document.getElementById(buttonID);
+				//disable it
+				buttonLoc.disabled = true;
+			}
+
+			function EnableButton(buttonID){
+				/* enables the button with the provided ID */
+				//grab the button locations
+				var buttonLoc = document.getElementById(buttonID);
+				//disable it
+				buttonLoc.disabled = false;
+			}
+
+			function SetHeaderText(text){
+				/* sets the text in the header to the given string */
+				//get the text location
+				var textLoc = document.getElementById("headerText");
+				//insert the given text
+				textLoc.innerText = text;
+			}
+
+			function SetPlayersTotalValueText(text, color){
+				/* sets the players total value of their hand using thg given text, colors the text with the provided color */
+				//get the text location
+				var totTextLoc = document.getElementById("playersTotalValueTextArea");
+				//set the color to the provided color
+				totTextLoc.style.color = color;
+				//set the text to the provided text
+				totTextLoc.innerText = text;
+			}
+
+			function SetDealersTotalValueText(text, color){
+				/* sets the dealers total value of their hand using thg given text, colors the text with the provided color */
+				//get the text location
+				var totTextLoc = document.getElementById("dealersTotalValueTextArea");
+				//set the color to the provided color
+				totTextLoc.style.color = color;
+				//set the text to the provided text
+				totTextLoc.innerText = text;
+			}
+
+			function ResetDeck(){
+				/* Rebuilds a new deck, and then shuffles it */
+				//empty the deck out
+				Deck = [];
+				//loop through the suits list
+				for(x=0; x < cardSuits.length; x++){
+					//get the suit
+					var thisSuit = cardSuits[x];
+					//get the color of the card
+					var thisCardColor = cardColors[x];
+					//get the symbol of the card
+					var thisCardSymbol = cardSuitSymbols[x];
+					//now loop through the card val text list
+					for(y=0; y < cardValText.length; y++){
+						//get the text value
+						var thisTextVal = cardValText[y];
+						//get the numberic value
+						var thisVal = cardValues[y];
+						//create the card array containing the text value, suit, color, numberic value, and suit symbol 
+						var thisCard = [thisTextVal, thisSuit, thisCardColor, thisVal, thisCardSymbol];
+						//add the card array to the deck
+						Deck.push(thisCard);
+					}
+				}
+				//The deck has been populated, now shuffle it
+				Shuffle();
+			}
+
+			function Shuffle(){
+				/* shuffles the deck */
+				//create a temporary array to hold the results in
+				var tempDeck = [];
+				//get a count of the card arrays currently in the deck array
+				var totCard = Deck.length;
+				//loop through all remaining elements in the array
+				while(totCard > 0){
+					//get a random valid position in our current array
+					var thisCardNum = Math.floor(Math.random() * totCard);
+					//get the card array at this random location
+					var thisCard = Deck[thisCardNum];
+					//push it to the temp deck array
+					tempDeck.push(thisCard);
+					//pop it from the original array
+					Deck.splice(thisCardNum,1);
+					//remove one from the count
+					totCard --;
+				}
+				//all card arrays have been duplicated in the temp deck array, clear out the original deck array
+				Deck = [];
+				//repopulate the deck array with the now shuffled temporary deck array
+				Deck = tempDeck;
+				//clear out the temporary deck array
+				tempDeck = [];	
+			}
+
+			function StartBettingPool(){
+				/* initializes the betting pool */
+				//reset the betting pool variables
+				currentBettingPool = 500;
+				currentBetAmount = 0;
+				//display the updated betting pool
+				UpdateBettingPool(currentBettingPool,currentBetAmount);
+			}
+
+			function UpdateBettingPool(pool, bet){
+				/* displays the users betting pool */
+				//grab the locations
+				var cbpLoc = document.getElementById("currentPurse");
+				var cbLoc = document.getElementById("currentBet");
+				//change the text color based on the bet amount
+				if(bet < minBet){ cbLoc.style.color = "red"; }else{ cbLoc.style.color = "green"; }
+				//change the text in that location
+				cbLoc.innerText = "$" + bet + ".00";
+				//change the text color based on the amount left in the pool
+				if(currentBettingPool > 0 && currentBettingPool > 100){ cbpLoc.style.color = "green"; }
+				else if(currentBettingPool > 0 && currentBettingPool <= 100){ cbpLoc.style.color = "orange"; }
+				else{ cbpLoc.style.color = "red"; }
+				//change the text in that location
+				cbpLoc.innerText = "$" + pool + ".00";
+				//check to see if buttons need enabled/disabled
+				CheckGameButtons();
+			}
+			
+			function SetMinsAndMaxes(min, max){
+				/* initializes the minimum and maximum bet amounts to the provided min and max amounts */
+				//grab the locations
+				var minLoc = document.getElementById("minBet");
+				var maxLoc = document.getElementById("maxBet");
+				//change the text
+				minLoc.innerText = min;
+				maxLoc.innerText = max;
+			}
+
+			function IncreaseBet(){
+				/* adds the selected amount to the current bet amount */
+				//check to see if we can still do this first....
+				if(isGameInProgress() == false){
+					//grab the amount to increase from the select dropdown
+					var incValLoc = document.getElementById("betAmountIncrement");
+					var incVal = parseInt(incValLoc.options[incValLoc.selectedIndex].value);
+					//check it doesn't exceed the max or leave a negative pool
+					if((currentBetAmount + incVal) <= maxBet && (currentBettingPool - incVal) >= 0){
+						//add it to the bet
+						currentBetAmount += incVal;
+						//remove it form the pool
+						currentBettingPool -= incVal;
+						//display the new betting pool amounts
+						UpdateBettingPool(currentBettingPool,currentBetAmount);
+					}
+				}
+			}
+
+			function DecreaseBet(){
+				/* removes the selected amount from the current bet amount */
+				//check we can still do this first.....
+				if(isGameInProgress() == false){
+					//grab the amount to increase from the select dropdown
+					var incValLoc = document.getElementById("betAmountIncrement");
+					var incVal = parseInt(incValLoc.options[incValLoc.selectedIndex].value);
+					//check it doesn't reduce the bet to less than 0
+					if((currentBetAmount - incVal) >= 0){
+						//remove it form the bet
+						currentBetAmount -= incVal;
+						//add it back to the pool
+						currentBettingPool += incVal;
+						//display the new betting pool amounts
+						UpdateBettingPool(currentBettingPool,currentBetAmount);
+					}
+				}
+			}
+
+			function SetBetToMax(){
+				/* set the bet amount ot the maximum */
+				//check we can still do this first.....
+				if(isGameInProgress() == false){
+					//take the current bet and return it to the pool
+					currentBettingPool += currentBetAmount;
+					//now remove the maximum amount
+					currentBettingPool -= maxBet;
+					//now add it to the current bet
+					currentBetAmount = maxBet;
+					//finally, update the betting pool
+					UpdateBettingPool(currentBettingPool, currentBetAmount);
+				}
+			}
+
+			function SetBetToMin(){
+				/* set the bet amount ot the minimum */
+				//check we can still do this first.....
+				if(isGameInProgress() == false){
+					//take the current bet and return it to the pool
+					currentBettingPool += currentBetAmount;
+					//now remove the minimum amount
+					currentBettingPool -= minBet;
+					//now add it to the current bet
+					currentBetAmount = minBet;
+					//finally, update the betting pool
+					UpdateBettingPool(currentBettingPool, currentBetAmount);
+				}
+			}
+
+			function ResetHolds(){
+				/* reset the player & dealer hold status booleans */
+				playerHolds = false;
+				dealerHolds = false;
+			}
+
+			function ResetWins(){
+				/* reset the winCondMet boolean */
+				winCondMet = false;
+			}
+
+			function ResetHands(){
+				/* reset the player and the dealers hand arrays */
+				playersCurrentHand = [];
+				dealersCurrentHand = [];
+			}
+
+			function DealCards(){
+				/* deal the cards out after the user has placed their bet */
+				//check to see if we can do this or not
+				if(isBetSufficient() == true && isGameInProgress() == false){
+					//their bet is sufficient, let's start a game!
+					//first, reset the deck
+					ResetDeck();
+					//now clear out any stragglers in the hands....
+					ResetHands();
+					//reset any hold statuses
+					ResetHolds();
+					//reset winConds
+					ResetWins();
+					//now dole out two cards to each player....
+					AddCard(playersCurrentHand);
+					AddCard(dealersCurrentHand);
+					AddCard(playersCurrentHand);
+					AddCard(dealersCurrentHand);
+					//check if we need to enable/disable any buttons
+					CheckGameButtons();
+					//set the header text
+					SetHeaderText(yourTurnText);
+					//display the cards
+					DisplayCards();
+					//check for any potential win conditions
+					CheckWinConditions();
+				}
+			}
+
+			function HitMe(){
+				/* adds another card to the users hand */
+				//check we don't have too many cards already
+				if(playersCurrentHand.length < 8){
+					//add a card to the players hand
+					AddCard(playersCurrentHand);
+					//check if we need to enable/disable any buttons
+					CheckGameButtons();
+					//display the cards
+					DisplayCards();
+					//check for any potential win conditions
+					CheckWinConditions();
+				}
+			}
+
+			function DoubleDown(){
+				/* adds a card to the players hand, doubles their bet, and sets the hold status to true */
+				//check that doubling the bet doesn't leave the pool in the negative
+				if(currentBettingPool - currentBetAmount >= 0){
+					//remove the current bet amount from the pool
+					currentBettingPool -= currentBetAmount;
+					//double the current bet
+					currentBetAmount += currentBetAmount;
+					//update the betting pool
+					UpdateBettingPool(currentBettingPool, currentBetAmount);
+					//add a card to the players hand
+					AddCard(playersCurrentHand);
+					//set the players hold status
+					playerHolds = true;
+					//check for buttons we need to disable/enable
+					CheckGameButtons();
+					//set the header text
+					SetHeaderText(dealersTurnText);
+					//display the cards
+					DisplayCards();
+					//check for any potential win conditions
+					CheckWinConditions();
+					//start the dealers turn
+					DealersTurn();
+				}
+			}
+
+			function Hold(){
+				/* sets the hold status for the player to true */
+				//put the hold status to true
+				playerHolds = true;
+				//set the text in the header
+				SetHeaderText(dealersTurnText);
+				//check for buttons we need to disable/enable
+				CheckGameButtons();
+				//display the cards
+				DisplayCards();
+				//check for any potential win conditions
+				CheckWinConditions();
+				//start the dealers turn
+				DealersTurn();
+			}
+
+			function AddCard(hand){
+				/* Adds a card to the provided hand */
+				//grab the top card array in the deck array
+				var thisCard = Deck[0];
+				//add this card array to the provided hand array
+				hand.push(thisCard);
+				//remove the card array from the top of the deck array
+				Deck.shift(0);
+			}
+
+			function isBetSufficient(){
+				/* returns the status of the bet amount */
+				//returns true if bet is within limits, false otherwise
+				if(currentBetAmount >= minBet && currentBetAmount <= maxBet){ return true; }else{ return false; }
+			}
+
+			function isGameInProgress(){
+				/* returns the status of the game */
+				//returns true if there are cards in the players hand, false otherwise
+				if(playersCurrentHand.length > 0){ return true; }else{ return false; }
+			}
+
+			function CheckGameButtons(){
+				/* Determines when to enable/disable buttons based on the game variables */
+				//check to see if we are currently in a game ...
+				if(isGameInProgress() == true){
+					//there is a game going at the moment, diable the betting related buttons ....
+					DisableButton("dealButton");
+					DisableButton("increaseBetButton");
+					DisableButton("decreaseBetButton");
+					DisableButton("maxBetButton");
+					DisableButton("minBetButton");
+					//if the game is going, and the player has not chosen to hold, then enable the hold and hit buttons
+					if(playerHolds == false){
+						EnableButton("holdButton");
+						EnableButton("hitMeButton");
+						//if this is just after the initial deal, enable the double down button. Otherwise, disable it
+						if(playersCurrentHand.length == 2){ EnableButton("doubleDownButton"); }else{ DisableButton("doubleDownButton"); }
+					}else{
+						//the player held, so turn off all the other buttons
+						DisableButton("holdButton");
+						DisableButton("hitMeButton");
+						DisableButton("doubleDownButton");
+					}
+				}else{
+					//There's no game going yet. Check if they can deal or not....
+					if(isBetSufficient() == true){ EnableButton("dealButton"); }else{ DisableButton("dealButton"); }
+					//enable the increase and decrease bet buttons
+					EnableButton("increaseBetButton");
+					EnableButton("decreaseBetButton");
+					EnableButton("maxBetButton");
+					EnableButton("minBetButton");
+				}
+			}
+
+			function DisableAllButtons(){
+				/* disables all buttons except the reset button */
+				DisableButton("dealButton");
+				DisableButton("increaseBetButton");
+				DisableButton("decreaseBetButton");
+				DisableButton("maxBetButton");
+				DisableButton("minBetButton");
+				DisableButton("holdButton");
+				DisableButton("hitMeButton");
+				DisableButton("doubleDownButton");
+			}
+
+			function DisplayCards(){
+				/* shows the card arrays the users have in their hand arrays */
+				//get the locations of the elements
+				var pchs = document.getElementById("playersCardHoldersSection");
+				var dchs = document.getElementById("dealersCardHoldersSection");
+				//remove anything currently in these locations
+				pchs.innerText = '';
+				dchs.innerText = '';
+				//set up some vars to populate our html additions in
+				var pchsString = "";
+				var dchsString = "";
+				//set up vars to hold the scores
+				var playersCurrentTotalValue = 0;
+				var dealersCurrentTotalValue = 0;
+				//set up a string to store the score in just incase we need to add a ' / ' to show score with and without additional 10 from an ace
+				var pctvText = "";
+				var dctvText = "";
+				//set up a boolean to track the existence of an ace
+				var playerHasAces = false;
+				var dealerHasAces = false;
+				//set up a bool to handle the dealers display value
+				var dealersValueShown = true;
+				//set up a var to hold the color of the text
+				var textColor = "";
+				//loop through the users hand array
+				for(i=0; i < playersCurrentHand.length; i++){
+					//get the card array we're on
+					var thisCardData = playersCurrentHand[i];
+					//set up our html based on this card arrays values
+					pchsString += "<div id='cardHolders' class='w3-round'><span style='color: " + thisCardData[2] + "'><div class='topLeftCard'>" + thisCardData[3] + " " +  thisCardData[4] + "</div><div class='middleCard'>" + thisCardData[0] + "<br/>of<br/>" + thisCardData[1] + "<br/><span style='font-size: 45px;'>" + thisCardData[4] + "</span></div><div class='bottomRightCard'>" + thisCardData[3] + " " + thisCardData[4] + "</div></span></div>";
+					//find out if we have an ace. if we do, set our boolean for later
+					if(thisCardData[3] == 1){ playerHasAces = true; }
+					//add the total numerical value up
+					playersCurrentTotalValue += thisCardData[3];
+				}
+				//now show all the players cards...
+				pchs.innerHTML = pchsString;
+				//loop through the dealers card arrays 
+				for(j=0; j < dealersCurrentHand.length; j++){
+					//get the card array we're on
+					var thisCardData = dealersCurrentHand[j];
+					//if this is the dealers first card [0], and the user hasn't held yet, then don't show it!!!
+					if(j == 0 && playerHolds == false) {
+						//set the card to blue ??? to indicate the unknown
+						dchsString += "<div id='cardHolders' class='w3-round'><span style='color: blue;'><div class='topLeftCard'>???</div><div class='middleCard'><br/><br/>???</div><div class='bottomRightCard'>???</div></span></div>";
+						//set the dealers Display boolean to false
+						dealersValueShown = false;
+					}else{
+						//set the html to reflect this cards values
+						dchsString += "<div id='cardHolders' class='w3-round'><span style='color: " + thisCardData[2] + "'><div class='topLeftCard'>" + thisCardData[3] + " " +  thisCardData[4] + "</div><div class='middleCard'>" + thisCardData[0] + "<br/>of<br/>" + thisCardData[1] + "<br/><span style='font-size: 36px;'>" + thisCardData[4] + "</span></div><div class='bottomRightCard'>" + thisCardData[3] + " " + thisCardData[4] + "</div></span></div>";
+						//find out if we have an ace. if we do, set our boolean for later
+						if(thisCardData[3] == 1){ dealerHasAces = true; }
+						//add the total numerical values up, but only if this card is showing
+						dealersCurrentTotalValue += thisCardData[3];
+					}
+				}
+				//now show the dealers cards....
+				dchs.innerHTML = dchsString;
+				//if the player has aces, then we need to make an adjustment to the total text before displaying it....
+				if(playerHasAces){
+					//show the value with and without the additional 10
+					pctvText = playersCurrentTotalValue + " / " + (playersCurrentTotalValue +10);
+				}else{
+					//show the value as is
+					pctvText = playersCurrentTotalValue;
+				}
+				//if the dealer has aces, then we need to make an adjustment to the total text before displaying it....
+				if(dealerHasAces){
+					//show the value with and without the additional 10
+					dctvText = dealersCurrentTotalValue + " / " + (dealersCurrentTotalValue +10);
+				}else{
+					//show the value as is
+					dctvText = dealersCurrentTotalValue;
+				}
+				//now check the actual value for a color to use...
+				if(playersCurrentTotalValue > 21){
+					//this one is over the limit, show in red
+					textColor = "red";
+				}else if(playersCurrentTotalValue == 21){
+					//this one is the exact amount. show in yellow
+					textColor = "yellow";
+				}else if(playersCurrentTotalValue < 21 && playersCurrentTotalValue >= 15){
+					//this one is between 15 and 20, so show in orange
+					textColor = "orange";
+				}else{
+					//less than 15, show in white
+					textColor = "white";
+				}
+				//update the total values text
+				SetPlayersTotalValueText(pctvText, textColor);
+				//update the dealers total values text (always in white)
+				if(dealersValueShown){ SetDealersTotalValueText(dctvText, "white"); }else{ SetDealersTotalValueText("Unknown", "white"); }
+			}
+
+			function CheckWinConditions(){
+				/* look for potential win conditions based on the games current state */
+				//set up some vars for totals
+				var playersTotal = 0;
+				var dealersTotal = 0;
+				//set up vars for if aces are in the mix
+				var playerHasAces = false;
+				var dealerHasAces = false;
+				//loop through the players hand array and get the players card array values
+				for(m=0; m < playersCurrentHand.length; m++){
+					//get the card array in this position
+					var thisCard = playersCurrentHand[m];
+					//add the numeric value to the players total
+					playersTotal += thisCard[3];
+					//denote if this player has aces or not
+					if(thisCard[3] == 1){ playerHasAces = true; }
+				}
+				//loop through the dealers hand array and get the dealers card array values
+				for(n=0; n < dealersCurrentHand.length; n++){
+					//get hte card array in this position
+					var thisCard = dealersCurrentHand[n];
+					//add the numeric value to the dealers total
+					dealersTotal += thisCard[3];
+					//denote if the dealer has aces or not
+					if(thisCard[3] == 1){ dealerHasAces = true; }
+				}
+				//if they had aces to add, and the extra 10 doesn't bust the player, add it in now....
+				if(playerHasAces && (playersTotal + 10) <= 21 ){ playersTotal += 10; }
+				if(dealerHasAces && (dealersTotal + 10) <= 21 ){ dealersTotal += 10; }
+				//check for 21's now...
+				if(playersTotal == 21 && dealersTotal == 21 && dealersCurrentHand.length == 2 && playersCurrentHand.length == 2){
+					//It's a push on two black jacks ?? (boo!) Set the booleans
+					playerHolds = true;
+					dealerHolds = true;
+					winCondMet = true;
+					//add the bet back into the pool
+					AddToPool(currentBetAmount);
+					//disable all buttons
+					DisableAllButtons();
+					//dispaly the cards
+					DisplayCards();
+					//display the results
+					ShowWinCond("It's a push!!");
+				}else if(playersTotal != 21 && dealersTotal == 21 && dealersCurrentHand.length == 2){
+					//the dealer has won via black jack (boo!) Set the booleans
+					playerHolds = true;
+					dealerHolds = true;
+					winCondMet = true;
+					//disable all buttons
+					DisableAllButtons();
+					//dispaly the cards
+					DisplayCards();
+					//display the results
+					ShowWinCond("The dealer has Black Jack!");
+				}else if(playersTotal == 21 && dealersTotal != 21 && playersCurrentHand.length == 2){
+					//the player won! Woo Hoo! Set the booleans
+					playerHolds = true;
+					dealerHolds = true;
+					winCondMet = true;
+					//disable all buttons
+					DisableAllButtons();
+					//dispaly the cards
+					DisplayCards();
+					//triple the bet, and add it to the pool
+					AddToPool(currentBetAmount*3);
+					//display the results
+					ShowWinCond("Black Jack! You win $" + currentBetAmount*3 + ".00 !!");
+				}else{
+					//No immediate black jacks, now we need to see if anyone has busted
+					if(playersTotal > 21){
+						//the player busted. Set the booleans 
+						playerHolds = true;
+						dealerHolds = true;
+						winCondMet = true;
+						//disable all buttons
+						DisableAllButtons();
+						//dispaly the cards
+						DisplayCards();
+						//display the results
+						ShowWinCond("You busted. Dealer has won."); 
+					}else if(dealersTotal > 21){ 
+						//The dealer has busted. Set the booleans
+						playerHolds = true;
+						dealerHolds = true;
+						winCondMet = true;
+						//disable all buttons
+						DisableAllButtons();
+						//dispaly the cards
+						DisplayCards();
+						//double the bet and add it to the pool
+						AddToPool(currentBetAmount*2); 
+						//display the results
+						ShowWinCond("Dealer has busted. You win $" + currentBetAmount*2 + ".00 !!");
+					}else{
+						//no one has busted, and no one has black jack, so check for holds...
+						if(playerHolds && dealerHolds && winCondMet == false){
+							//both have stopped getting cards, check the totals for who wins
+							if(playersTotal > dealersTotal){
+								//the player has more than the dealer, set the boolean
+								winCondMet = true;
+								//disable all buttons
+								DisableAllButtons();
+								//dispaly the cards
+								DisplayCards();
+								//double the bet and add it to the pool
+								AddToPool(currentBetAmount*2);
+								//display the results
+								ShowWinCond("You won $" + currentBetAmount*2 + ".00 !");
+							}else if(dealersTotal > playersTotal){
+								//the dealer has more than the player, set the boolean
+								winCondMet = true;
+								//disable all buttons
+								DisableAllButtons();
+								//dispaly the cards
+								DisplayCards();
+								//display the results
+								ShowWinCond("You lost.");
+							}else{
+								//they've tied. it's a push. set the boolean
+								winCondMet = true;
+								//disable all buttons
+								DisableAllButtons();
+								//dispaly the cards
+								DisplayCards();
+								//add the bet back to the pool
+								AddToPool(currentBetAmount);
+								//display the results
+								ShowWinCond("It's a push.");
+							}
+						}
+					}
+				}
+			}
+
+			function DealersTurn(){
+				/* controls the dealers turn */
+				//if we haven't held, do some checking....
+				if(dealerHolds == false){
+					//disable all buttons
+					DisableAllButtons();
+					//we haven't held yet, check the total...
+					var dcTot = CheckDealersHand();
+					//determine if we want to draw or hold
+					if(dcTot > 15){ 
+						//dealer must hold on 16 or greater. set the boolean
+						dealerHolds = true;
+						//display the cards
+						DisplayCards();
+						//set the totals text
+						SetDealersTotalValueText(dcTot,"white");
+						//see if a win condition exists
+						CheckWinConditions(); 
+					}else{
+						//less than 16, so take a hit...
+						AddCard(dealersCurrentHand);
+						//display the cards
+						DisplayCards();
+						//check for potential win conditions
+						CheckWinConditions();
+						//take another turn
+						DealersTurn();
+					}
+				}
+			}
+
+			function CheckDealersHand(){
+				/* returns the current total of the dealers hand */
+				//set up a var to hold the total
+				var dealersCurTotal = 0;
+				//set up a var to determine if there is an ace involved
+				var hasAce = false;
+				//loop through the dealers hand array
+				for(q=0;q < dealersCurrentHand.length; q++){
+					//get the card array at this location
+					var thisCard = dealersCurrentHand[q];
+					//add the numeric value to the dealers total value
+					dealersCurTotal += thisCard[3];
+					//determine if an ace is present
+					if(thisCard[3] == 1){ hasAce = true; }
+				}
+				//if an ace exists, determine if we're adding the extra 10 or not
+				if(hasAce && (dealersCurTotal + 10) <= 21){ dealersCurTotal += 10; }
+				//retunr the calculated value
+				return dealersCurTotal;
+			}
+
+			function ShowWinCond(winText){
+				/* Displays the results when someone wins the game */
+				//get the reset button area
+				var resetButtonArea = document.getElementById("resetButtonArea");
+				//write out the win text that was provided
+				SetHeaderText(winText);
+				//present the button to reset the game
+				resetButtonArea.innerHTML = "<input type='button' name='resetButton' value='Next Hand' onClick='ResetGame();'>";
+			}
+
+			function ResetGame(){
+				/* allows the user to start a new hand once a win condition has been achieved */
+				//get the reset button area
+				var resetButtonArea = document.getElementById("resetButtonArea");
+				//remove what's there
+				resetButtonArea.innerHTML = "";
+				//set the card option buttons to disabled...
+				DisableButton("dealButton");
+				DisableButton("hitMeButton");
+				DisableButton("holdButton");
+				DisableButton("doubleDownButton");
+				//set the header text
+				SetHeaderText(betText);
+				//reset the total value texts
+				SetPlayersTotalValueText(0,"white");
+				SetDealersTotalValueText("Unknown","white");
+				//reset the hold booleans
+				ResetHolds();	
+				//reset the win conditions boolean
+				ResetWins();
+				//reset the hands	
+				ResetHands();
+				//reset the bet amounts
+				currentBetAmount = 0;
+				//update the betting pool
+				UpdateBettingPool(currentBettingPool, currentBetAmount);
+				//enable the betting buttons
+				EnableButton("increaseBetButton");
+				EnableButton("decreaseBetButton");
+				//get the card display locations
+				var pchs = document.getElementById("playersCardHoldersSection");
+				var dchs = document.getElementById("dealersCardHoldersSection");
+				//clear out the card display locations
+				pchs.innerText = '';
+				dchs.innerText = '';
+			}
+
+			function AddToPool(amt){
+				/* adds the players winnings into their betting pool */
+				//adds the amt to the betting pool
+				currentBettingPool += amt;
+			}
+		</script>
+		<style>
+			/* CSS rules for document elements */
+			body{
+				font-family: 'Cuprum', sans-serif;
+			}
+			h1{
+				font-family: 'Amaranth', sans-serif;
+				font-size: 36pt;
+				padding: 0;
+				margin: 0;
+			}
+			h3{
+				font-family: 'Amaranth', sans-serif;
+				padding: 0;
+				margin: 0;
+			}
+			#container{
+				min-width: 1024px;
+				min-height: 920px;
+			}
+			#bettingPool{
+				min-width: 200px;
+				width: 20%;
+				border: 2px solid black;
+				text-align: center;
+				float: left;
+				clear: none;
+			}
+			#textArea{
+				width: 60%;
+				min-width: 200px;
+				float: left;
+				clear: none;
+			}
+			#header{
+				width:100%;
+				clear: both;
+			}
+			#cardHolders{
+				float: left;
+				clear: none;
+				border: 2px solid black;
+				width: 120px;
+				height: 200px;
+				text-align: center;
+				margin-left: 10px;
+			}
+			.topLeftCard{
+				width: 100%;
+				height: 10%;
+				text-align: left;
+				padding-left: 3px;
+			}
+			.middleCard{
+				width: 100%;
+				height: 80%;
+				text-align: center;
+				padding-top: 20%;
+			}
+			.bottomRightCard{
+				width: 100%;
+				height: 10%;
+				text-align: right;
+				padding-right: 3px;
+			}
+			#playersHand{
+				width: 100%;
+				height: 320px;
+			}
+			#opponentsHand{
+				width: 100%;
+				height: 300px;
+			}
+			#playersCardHoldersSection{
+				height: 250px;
+			}
+			#ealersCardHoldersSection{
+				height: 250px;
+			}
+		</style>
+	</head>
+	<body onload="Init();">
+		<div class="w3-container" id="container">
+			<h3><b>&spades;<span style="color:red;">&diamond;</span> Black Jack <span style="color:red;">&hearts;</span>&clubs;</b></h3>
+			<div id="header" class="w3-container w3-sand w3-round w3-padding-small">
+				<div id="bettingPool" class="w3-container w3-round w3-padding-small w3-white">
+					<div id="bettingPoolHead" class="w3-container w3-black w3-round w3-padding-small">
+						<h3>Betting Pool</h3>
+						Minimum: $<span id="minBet"></span>.00 &nbsp; Maximum: $<span id="maxBet"></span>.00
+					</div>
+					<div id="currentPurseHolder">Current Purse: <span id="currentPurse"></span></div>
+					<div id="currentBetHolder">Current Bet: <span id="currentBet"></span></div>
+					<div id="betButtonHolder">
+						<b><input type="button" name="IncreaseBetButton" value="+" onClick="IncreaseBet();" class="betButton" id="increaseBetButton"></b>
+							<select name="betAmountIncrement" id="betAmountIncrement"><option value="1">$1.00</option><option value="5">$5.00</option><option value="10">$10.00</option></select>
+						<b><input type="button" name="DecreaseBetButton" value="-" onClick="DecreaseBet();" class="betButton" id="decreaseBetButton"></b><br/>
+						<input type="button" name="MaxBetButton" value="Max" onClick="SetBetToMax();" id="maxBetButton"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<input type="button" name="MinBetButton" value="Min" onClick="SetBetToMin();" id="minBetButton">
+					</div>
+				</div>
+				<div id="textArea" class="w3-container w3-round w3-padding-small w3-center"><h1><b><span id="headerText"></span></b></h1><span id="resetButtonArea"></span></div>
+			</div>
+			<div id="playersHand" class="w3-container w3-round w3-padding-small w3-margin-top-small">
+				<div id="playersHandHeader" class="w3-container w3-round w3-green w3-padding-small">
+					<h3>Your Hand</h3>
+					Total value: <span id="playersTotalValueTextArea"></span><br/>
+					<input type="button" name="dealButton" onClick="DealCards();" value="Deal" id="dealButton">
+					&nbsp;&nbsp;
+					<input type="button" name="hitMeButton" onClick="HitMe();" value="Hit Me" id="hitMeButton">
+					&nbsp;&nbsp;
+					<input type="button" name="holdButton" onClick="Hold();" value="Hold" id="holdButton">
+					&nbsp;&nbsp;
+					<input type="button" name="doubleDownButton" onClick="DoubleDown();" value="Double Down" id="doubleDownButton">
+				</div>
+				<div id="playersCardHoldersSection" class="w3-margin-top">
+				</div>
+			</div>
+			<div id="opponentsHand" class="w3-container w3-round w3-padding-small w3-margin-top-small">
+				<div id="opponentsHandHeader" class="w3-container w3-round w3-green">
+					<h3>Dealers Hand</h3>
+					Dealers Total value: <span id="dealersTotalValueTextArea"></span><br/>
+				</div>
+				<div id="dealersCardHoldersSection" class="w3-margin-top">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
